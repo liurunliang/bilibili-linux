@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [ "$(uname)" == "Darwin" ]; then
+    SED=gsed
+else
+    SED=sed
+fi
+
 root_dir=$(cd `dirname $0`/.. && pwd -P)
 
 set -e
@@ -32,7 +38,7 @@ asar e "app.asar" app
 
 notice "暴露弹幕管理接口"
 grep -lr "this.initDanmaku(),this" --exclude="app.asar" .
-sed -i 's#this.initDanmaku(),this#this.initDanmaku(),window.danmakuManage = this,this#' "app/render/assets/lib/core.js"
+$SED -i 's#this.initDanmaku(),this#this.initDanmaku(),window.danmakuManage = this,this#' "app/render/assets/lib/core.js"
 
 asar p app app.asar
 rm -rf app

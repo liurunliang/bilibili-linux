@@ -15,15 +15,21 @@ fail() {
     echo -e "\033[41;37m 失败 \033[0m $1"
 }
 
+if [ "$(uname)" == "Darwin" ]; then
+    SED=gsed
+else
+    SED=sed
+fi
+
 root_dir=$(cd `dirname $0`/.. && pwd -P)
 
 if [[ "$BUILD_VERSION" == *continuous ]];then
     echo "continuous"
-    sed -i 's#"buildVersion": "[0-9]\+",#"buildVersion": "0",#' "$root_dir/package.json"
+    $SED -i 's#"buildVersion": "[0-9]\+",#"buildVersion": "0",#' "$root_dir/package.json"
 else
     tag=(${BUILD_VERSION//-/ })
     echo "${tag[1]}"
-    sed -i 's#"buildVersion": "[0-9]\+",#"buildVersion": "'${tag[1]}'",#' "$root_dir/package.json"
+    $SED -i 's#"buildVersion": "[0-9]\+",#"buildVersion": "'${tag[1]}'",#' "$root_dir/package.json"
 fi
 
 tmp_dir="$root_dir/tmp"

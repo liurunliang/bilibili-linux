@@ -1,6 +1,12 @@
 #!/bin/bash
 root_dir=$(cd `dirname $0`/.. && pwd -P)
 
+if [ "$(uname)" == "Darwin" ]; then
+    SED=gsed
+else
+    SED=sed
+fi
+
 set -ex
 trap 'catchError $LINENO "$BASH_COMMAND"' ERR # 捕获错误情况
 catchError() {
@@ -32,22 +38,22 @@ notice "修复不能启动的问题 index.js -- $root_dir"
 cat "$root_dir/res/scripts/injectIndex.js" > "app/index.js"
 # 从app.js加载 ok
 # grep -lr '!import_electron2' --exclude="app.asar" .
-# sed -i 's#!import_electron2#import_electron2#' app/main/index.js
+# $SED -i 's#!import_electron2#import_electron2#' app/main/index.js
 # grep -lr 'global;import_electron2' --exclude="app.asar" .
-# sed -i 's#global;import_electron2#global;!import_electron2#' app/main/index.js
+# $SED -i 's#global;import_electron2#global;!import_electron2#' app/main/index.js
 notice "====app.js===="
 
 notice "屏蔽检测"
 # grep -lr 'if (!dj' --exclude="app.asar" .
-# sed -i 's#if (!dj#if(false\&\&!dj#g' "app/main/app.js"
+# $SED -i 's#if (!dj#if(false\&\&!dj#g' "app/main/app.js"
 # ==='win';if(! 警告11
 grep -lr 'if (!iT)' --exclude="app.asar" .
-sed -i 's#if (!iT)#if(false\&\&!iT)#' "app/main/app.js"
+$SED -i 's#if (!iT)#if(false\&\&!iT)#' "app/main/app.js"
 # global['bootstrapApp']();
 # grep -lr 'if (dj)' --exclude="app.asar" .
-# sed -i 's#if (dj)#if(!dj)#' "app/main/app.js"
+# $SED -i 's#if (dj)#if(!dj)#' "app/main/app.js"
 #grep -lr '};!fb' --exclude="app.asar" .
-#sed -i 's#};!fb#};false\&\&!fb#' "app/main/app.js"
+#$SED -i 's#};!fb#};false\&\&!fb#' "app/main/app.js"
 
 notice "路由"
 cat "$root_dir/res/scripts/inject-biliapp.js" >> app/render/assets/biliapp.*.js
@@ -55,8 +61,8 @@ cat "$root_dir/res/scripts/inject-biliapp.js" >> app/render/assets/biliapp.*.js
 notice "检查更新"
 # 检查更新
 grep -lr "// noinspection SuspiciousTypeOfGuard" --exclude="app.asar" .
-sed -i 's#// noinspection SuspiciousTypeOfGuard#runtimeOptions.platform="win32";// noinspection SuspiciousTypeOfGuard#' app/node_modules/electron-updater/out/providerFactory.js
-sed -i 's#process.resourcesPath#path.dirname(this.app.getAppPath())#' app/node_modules/electron-updater/out/ElectronAppAdapter.js
+$SED -i 's#// noinspection SuspiciousTypeOfGuard#runtimeOptions.platform="win32";// noinspection SuspiciousTypeOfGuard#' app/node_modules/electron-updater/out/providerFactory.js
+$SED -i 's#process.resourcesPath#path.dirname(this.app.getAppPath())#' app/node_modules/electron-updater/out/ElectronAppAdapter.js
 
 notice "====Bili Bridge===="
 notice "inject"
